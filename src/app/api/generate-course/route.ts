@@ -21,7 +21,8 @@ export async function POST(request: NextRequest) {
     const timeout = setTimeout(() => controller.abort(), 120000) // 2 minute timeout
     
     try {
-      const veniceResponse = await fetch(`${VENICE_API_URL}/chat/completions`, {
+      // First attempt with qwen3-235b (supports response_format)
+      let veniceResponse = await fetch(`${VENICE_API_URL}/chat/completions`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${VENICE_API_KEY}`,
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
         },
         signal: controller.signal,
         body: JSON.stringify({
-          model: 'venice-uncensored', // Supports response_format for structured JSON output
+          model: 'qwen3-235b', // Venice Large - supports response_format
           messages: [
             {
               role: 'system',
@@ -108,6 +109,86 @@ export async function POST(request: NextRequest) {
         }
       }),
     })
+
+      // If model rejects response_format, fallback to venice-uncensored
+      if (!veniceResponse.ok) {
+        const errorPreview = await veniceResponse.clone().text()
+        if (errorPreview.includes('response_format is not supported by this model')) {
+          console.warn('Model rejected response_format. Falling back to venice-uncensored...')
+          veniceResponse = await fetch(`${VENICE_API_URL}/chat/completions`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${VENICE_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            signal: controller.signal,
+            body: JSON.stringify({
+              model: 'venice-uncensored',
+              messages: [
+                { role: 'system', content: 'You are an expert AI educator who creates personalized learning curricula. You MUST respond with ONLY valid JSON matching the exact schema provided. Do not include any text outside the JSON object.' },
+                { role: 'user', content: prompt }
+              ],
+              temperature: 0.7,
+              max_tokens: 100000,
+              response_format: {
+                type: 'json_schema',
+                json_schema: {
+                  name: 'course_curriculum',
+                  strict: true,
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      title: { type: 'string' },
+                      subtitle: { type: 'string' },
+                      overallDescription: { type: 'string' },
+                      chapters: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            chapterNumber: { type: 'number' },
+                            title: { type: 'string' },
+                            learningObjective: { type: 'string' },
+                            content: { type: 'string' },
+                            keyTerms: {
+                              type: 'array',
+                              items: {
+                                type: 'object',
+                                properties: {
+                                  term: { type: 'string' },
+                                  definition: { type: 'string' }
+                                },
+                                required: ['term', 'definition'],
+                                additionalProperties: false
+                              }
+                            },
+                            examples: { type: 'array', items: { type: 'string' } },
+                            tryItYourself: { type: 'array', items: { type: 'string' } },
+                            toolWalkthrough: {
+                              type: ['object', 'null'],
+                              properties: {
+                                toolName: { type: 'string' },
+                                description: { type: 'string' },
+                                steps: { type: 'array', items: { type: 'string' } }
+                              },
+                              required: ['toolName', 'description', 'steps'],
+                              additionalProperties: false
+                            }
+                          },
+                          required: ['chapterNumber', 'title', 'learningObjective', 'content', 'keyTerms', 'examples', 'tryItYourself'],
+                          additionalProperties: false
+                        }
+                      }
+                    },
+                    required: ['title', 'subtitle', 'overallDescription', 'chapters'],
+                    additionalProperties: false
+                  }
+                }
+              }
+            }),
+          })
+        }
+      }
     
     clearTimeout(timeout) // Clear timeout after successful response
 
