@@ -25,12 +25,9 @@ export default function CourseView({ userProfile }: CourseViewProps) {
     setError(null)
 
     try {
-      // Use Render API for production, local API for development
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://aipathway.onrender.com'
+      console.log('🚀 Generating course...')
       
-      console.log('🚀 Calling API:', API_URL)
-      
-      const response = await fetch(`${API_URL}/api/generate-course`, {
+      const response = await fetch('/api/generate-course', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,0 +1,19 @@
+# Render Blueprint for AIPathway Next.js App
+
+services:
+  - type: web
+    name: aipathway
+    runtime: node
+    region: oregon
+    plan: free
+    branch: main
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: VENICE_API_KEY
+        sync: false
+      - key: VENICE_API_URL
+        value: https://api.venice.ai/api/v1
+
