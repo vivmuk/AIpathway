@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
         },
         signal: controller.signal,
         body: JSON.stringify({
-          model: 'llama-3.3-70b', // High-quality model for best curriculum generation
+          model: 'venice-uncensored', // Supports response_format for structured JSON output
           messages: [
             {
               role: 'system',
