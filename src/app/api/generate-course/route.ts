@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     // Build the prompt based on user profile
     const prompt = buildCoursePrompt(userProfile)
 
-    console.log('Calling Venice API with faster model for production...')
+    console.log('Calling Venice API with high-quality model...')
 
     // Call Venice API
     const VENICE_API_KEY = 'ntmhtbP2fr_pOQsmuLPuN_nm6lm2INWKiNcvrdEfEC' // Hard-coded for debugging
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     
     // Create abort controller for timeout
     const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 55000) // 55 second timeout
+    const timeout = setTimeout(() => controller.abort(), 120000) // 2 minute timeout
     
     try {
       const veniceResponse = await fetch(`${VENICE_API_URL}/chat/completions`, {
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
         },
         signal: controller.signal,
         body: JSON.stringify({
-          model: 'llama-3.2-3b', // Faster model for production (better for Netlify timeout limits)
+          model: 'llama-3.3-70b', // High-quality model for best curriculum generation
           messages: [
             {
               role: 'system',
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
             }
           ],
           temperature: 0.7,
-          max_tokens: 10000, // Reduced for faster generation
+          max_tokens: 100000, // High token limit for comprehensive content generation
         response_format: {
           type: 'json_schema',
           json_schema: {
