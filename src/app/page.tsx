@@ -41,76 +41,64 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <Header onRestart={step !== 'welcome' ? handleRestartQuiz : undefined} />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-12">
         {step === 'welcome' && (
           <div className="max-w-6xl mx-auto animate-fade-in">
-            {/* Hero Section with Glass Morphism */}
+            {/* Hero Section */}
             <div className="text-center mb-16 relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 blur-3xl -z-10"></div>
-              <div className="inline-block mb-4 px-4 py-2 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-full border border-blue-600/20 backdrop-blur-sm">
-                <span className="text-sm font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <div className="inline-block mb-6 px-5 py-2 bg-blue-50 rounded-full border border-blue-200">
+                <span className="text-sm font-semibold text-blue-700">
                   🚀 Powered by Advanced AI
                 </span>
               </div>
-              <h1 className="text-6xl md:text-7xl font-black mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent leading-tight">
+              <h1 className="text-6xl md:text-8xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 leading-tight tracking-tight">
                 AIPathway
               </h1>
-              <p className="text-2xl md:text-3xl text-gray-800 mb-4 font-semibold">
+              <p className="text-2xl md:text-3xl text-gray-900 mb-6 font-bold">
                 Your Personal AI Learning Journey
               </p>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                Take a quick 8-question assessment and get a custom 10-chapter AI curriculum 
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                Take a quick 9-question assessment and get a custom 10-chapter AI curriculum 
                 tailored exactly to you.
               </p>
             </div>
 
-            {/* Feature Cards with Modern Design */}
-            <div className="grid md:grid-cols-3 gap-6 mb-16">
-              <div className="group relative bg-gradient-to-br from-white to-blue-50 rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 border border-blue-100 hover:scale-105 hover:-translate-y-1">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/0 to-blue-600/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div className="relative">
-                  <div className="text-5xl mb-4 transform group-hover:scale-110 transition-transform">🎯</div>
-                  <h3 className="text-2xl font-bold mb-3 text-gray-900">Personalized</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Curriculum adapted to your knowledge level, goals, and learning style
-                  </p>
-                </div>
+            {/* Feature Cards */}
+            <div className="grid md:grid-cols-3 gap-8 mb-16">
+              <div className="bg-white rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100">
+                <div className="text-5xl mb-6">🎯</div>
+                <h3 className="text-2xl font-bold mb-4 text-gray-900">Personalized</h3>
+                <p className="text-gray-600 text-lg leading-relaxed">
+                  Curriculum adapted to your knowledge level, goals, and learning style
+                </p>
               </div>
-              <div className="group relative bg-gradient-to-br from-white to-purple-50 rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 border border-purple-100 hover:scale-105 hover:-translate-y-1">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-600/0 to-purple-600/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div className="relative">
-                  <div className="text-5xl mb-4 transform group-hover:scale-110 transition-transform">⚡</div>
-                  <h3 className="text-2xl font-bold mb-3 text-gray-900">Instant</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Get your complete 10-chapter course generated in under 45 seconds
-                  </p>
-                </div>
+              <div className="bg-white rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100">
+                <div className="text-5xl mb-6">⚡</div>
+                <h3 className="text-2xl font-bold mb-4 text-gray-900">Instant</h3>
+                <p className="text-gray-600 text-lg leading-relaxed">
+                  Get your complete 10-chapter course generated in under 45 seconds
+                </p>
               </div>
-              <div className="group relative bg-gradient-to-br from-white to-pink-50 rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 border border-pink-100 hover:scale-105 hover:-translate-y-1">
-                <div className="absolute inset-0 bg-gradient-to-br from-pink-600/0 to-pink-600/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div className="relative">
-                  <div className="text-5xl mb-4 transform group-hover:scale-110 transition-transform">🚀</div>
-                  <h3 className="text-2xl font-bold mb-3 text-gray-900">Cutting-Edge</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Learn the latest: GPT-5, Claude, LangChain, RAG systems, and more
-                  </p>
-                </div>
+              <div className="bg-white rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100">
+                <div className="text-5xl mb-6">🚀</div>
+                <h3 className="text-2xl font-bold mb-4 text-gray-900">Cutting-Edge</h3>
+                <p className="text-gray-600 text-lg leading-relaxed">
+                  Learn the latest: GPT-5, Claude, LangChain, RAG systems, and more
+                </p>
               </div>
             </div>
 
             {/* CTA Buttons */}
             <div className="text-center mb-16">
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
                 {/* Quick Start with Personas */}
                 <button
                   onClick={handleShowPersonas}
-                  className="group relative inline-flex items-center justify-center px-12 py-5 text-xl font-bold text-white overflow-hidden rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105"
+                  className="group relative inline-flex items-center justify-center px-12 py-5 text-xl font-bold text-white overflow-hidden rounded-full shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] hover:from-[#2563eb] hover:to-[#7c3aed]"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 group-hover:from-blue-500 group-hover:via-purple-500 group-hover:to-pink-500 transition-all"></div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity blur-xl"></div>
                   <span className="relative flex items-center gap-3">
                     🚀 Quick Start
                     <svg className="w-6 h-6 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -122,60 +110,57 @@ export default function Home() {
                 {/* Custom Quiz */}
                 <button
                   onClick={handleStartQuiz}
-                  className="group relative inline-flex items-center justify-center px-12 py-5 text-xl font-bold overflow-hidden rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 bg-white border-2 border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600"
+                  className="group relative inline-flex items-center justify-center px-12 py-5 text-xl font-bold overflow-hidden rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-white border-2 border-gray-200 text-gray-800 hover:border-blue-500"
                 >
                   <span className="relative flex items-center gap-3">
                     ✨ Custom Quiz
                   </span>
                 </button>
               </div>
-              <p className="text-gray-500 mt-4 text-sm font-medium">
+              <p className="text-gray-500 mt-6 text-base font-medium">
                 Choose a preset persona or customize your path
               </p>
             </div>
 
-            {/* Benefits Section with Glass Effect */}
-            <div className="relative bg-white/40 backdrop-blur-lg rounded-3xl shadow-xl p-10 border border-white/50">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 rounded-3xl blur opacity-30"></div>
-              <div className="relative">
-                <h2 className="text-3xl font-bold mb-8 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">What You Get</h2>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-white/50 transition-colors">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold text-lg">
-                      ✓
-                    </div>
-                    <span className="text-gray-700 leading-relaxed">10 personalized chapters from fundamentals to advanced applications</span>
+            {/* Benefits Section */}
+            <div className="bg-white rounded-3xl shadow-lg p-12 border border-gray-100">
+              <h2 className="text-4xl font-bold mb-10 text-blue-600">What You Get</h2>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
+                    ✓
                   </div>
-                  <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-white/50 transition-colors">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold text-lg">
-                      ✓
-                    </div>
-                    <span className="text-gray-700 leading-relaxed">Hands-on examples with real AI tools and frameworks</span>
+                  <span className="text-gray-700 text-lg leading-relaxed">10 personalized chapters from fundamentals to advanced</span>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
+                    ✓
                   </div>
-                  <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-white/50 transition-colors">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold text-lg">
-                      ✓
-                    </div>
-                    <span className="text-gray-700 leading-relaxed">Interactive exercises for practical learning</span>
+                  <span className="text-gray-700 text-lg leading-relaxed">Hands-on examples with real AI tools and frameworks</span>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
+                    ✓
                   </div>
-                  <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-white/50 transition-colors">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold text-lg">
-                      ✓
-                    </div>
-                    <span className="text-gray-700 leading-relaxed">Progress tracking and adaptive content</span>
+                  <span className="text-gray-700 text-lg leading-relaxed">Interactive exercises for practical learning</span>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
+                    ✓
                   </div>
-                  <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-white/50 transition-colors">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold text-lg">
-                      ✓
-                    </div>
-                    <span className="text-gray-700 leading-relaxed">Export as PDF or HTML for offline study</span>
+                  <span className="text-gray-700 text-lg leading-relaxed">Progress tracking and adaptive content</span>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
+                    ✓
                   </div>
-                  <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-white/50 transition-colors">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold text-lg">
-                      ✓
-                    </div>
-                    <span className="text-gray-700 leading-relaxed">Regenerate sections at different difficulty levels</span>
+                  <span className="text-gray-700 text-lg leading-relaxed">Export as HTML for offline study</span>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
+                    ✓
                   </div>
+                  <span className="text-gray-700 text-lg leading-relaxed">Industry-specific examples and use cases</span>
                 </div>
               </div>
             </div>

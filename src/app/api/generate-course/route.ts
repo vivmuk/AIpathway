@@ -10,32 +10,38 @@ export async function POST(request: NextRequest) {
     // Build the prompt based on user profile
     const prompt = buildCoursePrompt(userProfile)
 
-    console.log('Calling Venice API with qwen3-235b model...')
+    console.log('Calling Venice API with faster model for production...')
 
     // Call Venice API
     const VENICE_API_KEY = 'ntmhtbP2fr_pOQsmuLPuN_nm6lm2INWKiNcvrdEfEC' // Hard-coded for debugging
     const VENICE_API_URL = 'https://api.venice.ai/api/v1'
     
-    const veniceResponse = await fetch(`${VENICE_API_URL}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${VENICE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'venice-uncensored', // Confirmed in Venice docs to support response_format!
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert AI educator who creates personalized learning curricula. You MUST respond with ONLY valid JSON matching the exact schema provided. Do not include any text outside the JSON object.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 16000,
+    // Create abort controller for timeout
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 55000) // 55 second timeout
+    
+    try {
+      const veniceResponse = await fetch(`${VENICE_API_URL}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${VENICE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        signal: controller.signal,
+        body: JSON.stringify({
+          model: 'llama-3.2-3b', // Faster model for production (better for Netlify timeout limits)
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert AI educator who creates personalized learning curricula. You MUST respond with ONLY valid JSON matching the exact schema provided. Do not include any text outside the JSON object.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 10000, // Reduced for faster generation
         response_format: {
           type: 'json_schema',
           json_schema: {
@@ -102,6 +108,8 @@ export async function POST(request: NextRequest) {
         }
       }),
     })
+    
+    clearTimeout(timeout) // Clear timeout after successful response
 
     console.log('📡 Venice API response status:', veniceResponse.status)
     console.log('📡 Venice API response headers:', Object.fromEntries(veniceResponse.headers.entries()))
@@ -169,6 +177,22 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ course })
+    } catch (fetchError: any) {
+      clearTimeout(timeout)
+      
+      if (fetchError.name === 'AbortError') {
+        console.error('⏱️ Request timeout - Venice API took too long')
+        return NextResponse.json(
+          { 
+            error: 'Request timeout - The AI is taking longer than expected. Please try again.',
+            type: 'timeout'
+          },
+          { status: 504 }
+        )
+      }
+      
+      throw fetchError // Re-throw if not a timeout error
+    }
   } catch (error: any) {
     console.error('💥 Fatal error generating course:', error)
     console.error('💥 Error stack:', error.stack)
@@ -260,6 +284,17 @@ Throughout the curriculum, naturally incorporate these evidence-based principles
    - 3-5 key terms with definitions
    - 2-3 real-world examples ${profile.industry ? `(preferably from ${profile.industry})` : ''}
    - 2-3 "Try it yourself" practical exercises using accessible GenAI tools
+   
+   **CRITICAL: For prompt engineering exercises, use the GCSE Template:**
+   When suggesting prompt exercises, format them with these 4 components:
+   - **Goal**: What response do you want from the AI?
+   - **Context**: Why do you need it and who is involved?
+   - **Source**: Which information sources or samples should the AI use?
+   - **Expectations**: How should the AI respond to best meet your needs?
+   
+   Example format:
+   "**Goal**: Generate 3-5 bullet points | **Context**: to prepare me for a meeting with [Client/Topic] | **Source**: Focus on [specific documents/data] | **Expectations**: Please use simple language so I can get up to speed quickly."
+   
    - A tool walkthrough featuring current **GenAI tools** (prioritize: ChatGPT, Claude, Gemini, Copilot, Midjourney, ElevenLabs, Perplexity, etc.)
    - For technical learners, include frameworks like LangChain, LlamaIndex, or vector databases
 
