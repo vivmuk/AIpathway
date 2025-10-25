@@ -25,7 +25,12 @@ export default function CourseView({ userProfile }: CourseViewProps) {
     setError(null)
 
     try {
-      const response = await fetch('/api/generate-course', {
+      // Use Render API for production, local API for development
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://aipathway.onrender.com'
+      
+      console.log('🚀 Calling API:', API_URL)
+      
+      const response = await fetch(`${API_URL}/api/generate-course`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -34,10 +39,13 @@ export default function CourseView({ userProfile }: CourseViewProps) {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to generate course')
+        const errorData = await response.json().catch(() => ({}))
+        console.error('❌ API Error:', errorData)
+        throw new Error(errorData.error || 'Failed to generate course')
       }
 
       const data = await response.json()
+      console.log('✅ Course generated successfully')
       setCourse(data.course)
 
       // Initialize progress
