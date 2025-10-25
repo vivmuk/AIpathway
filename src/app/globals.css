@@ -9,9 +9,10 @@
   }
 
   body {
-    @apply bg-gray-50;
+    @apply bg-white;
     @apply text-gray-900;
     @apply min-h-screen;
+    font-weight: 400;
   }
 }
 
