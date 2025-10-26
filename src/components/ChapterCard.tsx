@@ -10,9 +10,12 @@ interface ChapterCardProps {
   onBack: () => void
   onComplete: () => void
   isCompleted: boolean
+  onNext?: () => void
+  onPrev?: () => void
+  totalChapters?: number
 }
 
-export default function ChapterCard({ chapter, onBack, onComplete, isCompleted }: ChapterCardProps) {
+export default function ChapterCard({ chapter, onBack, onComplete, isCompleted, onNext, onPrev, totalChapters = 10 }: ChapterCardProps) {
   const [showKeyTerms, setShowKeyTerms] = useState(true)
   const [showExamples, setShowExamples] = useState(true)
   const [showTryIt, setShowTryIt] = useState(true)
@@ -177,6 +180,27 @@ export default function ChapterCard({ chapter, onBack, onComplete, isCompleted }
             ✓ You've completed this chapter!
           </div>
         )}
+        
+        {/* Chapter Navigation */}
+        <div className="flex justify-center gap-4 mt-6">
+          {onPrev && (
+            <button
+              onClick={onPrev}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              ← Previous Chapter
+            </button>
+          )}
+          {onNext && (
+            <button
+              onClick={onNext}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Next Chapter →
+            </button>
+          )}
+        </div>
+        
         <button
           onClick={onBack}
           className="mt-4 text-gray-600 hover:text-gray-800"

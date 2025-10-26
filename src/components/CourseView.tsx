@@ -137,6 +137,9 @@ export default function CourseView({ userProfile }: CourseViewProps) {
             }
             setCourse(updatedCourse)
             setChaptersGenerated(i + 1)
+            
+            // Save progress after each chapter to prevent data loss
+            localStorage.setItem('aipathway_course', JSON.stringify(updatedCourse))
           } else {
             console.warn(`⚠️ Chapter ${i + 1} failed, using outline only`)
             fullChapters.push(initialCourse.chapters[i])
@@ -213,25 +216,26 @@ export default function CourseView({ userProfile }: CourseViewProps) {
   }
 
   const handleExportHTML = () => {
-    if (!course) {
-      alert('No course to export')
-      return
-    }
-    
-    // Check if chapters have content
-    const chaptersWithContent = course.chapters.filter(ch => ch.content && ch.content.trim() !== '')
-    if (chaptersWithContent.length === 0) {
-      alert('Please wait for chapters to finish generating before exporting.')
-      return
-    }
-    
-    if (chaptersWithContent.length < course.chapters.length) {
-      if (!confirm(`Only ${chaptersWithContent.length} of ${course.chapters.length} chapters have content. Export anyway?`)) {
+    try {
+      if (!course) {
+        alert('No course to export')
         return
       }
-    }
+      
+      // Check if chapters have content
+      const chaptersWithContent = course.chapters.filter(ch => ch?.content && ch.content.trim() !== '')
+      if (chaptersWithContent.length === 0) {
+        alert('Please wait for chapters to finish generating before exporting.')
+        return
+      }
+      
+      if (chaptersWithContent.length < course.chapters.length) {
+        if (!confirm(`Only ${chaptersWithContent.length} of ${course.chapters.length} chapters have content. Export anyway?`)) {
+          return
+        }
+      }
 
-    // Helper function to convert markdown to HTML
+      // Helper function to convert markdown to HTML
     const markdownToHTML = (markdown: string) => {
       return markdown
         // Headers
@@ -424,39 +428,39 @@ export default function CourseView({ userProfile }: CourseViewProps) {
         ${markdownToHTML(chapter.content)}
       </div>
       
-      ${chapter.keyTerms && chapter.keyTerms.length > 0 ? `
+      ${Array.isArray(chapter.keyTerms) && chapter.keyTerms.length > 0 ? `
       <h3>🔑 Key Terms</h3>
       ${chapter.keyTerms.map(term => `
         <div class="key-term">
-          <strong>${term.term}:</strong> ${term.definition}
+          <strong>${(term?.term || 'Term')}:</strong> ${(term?.definition || 'Definition')}
         </div>
       `).join('')}
       ` : ''}
       
-      ${chapter.examples && chapter.examples.length > 0 ? `
+      ${Array.isArray(chapter.examples) && chapter.examples.length > 0 ? `
       <h3>💡 Real-World Examples</h3>
       ${chapter.examples.map((example, idx) => `
         <div class="example">
-          <strong>Example ${idx + 1}:</strong> ${markdownToHTML(example)}
+          <strong>Example ${idx + 1}:</strong> ${markdownToHTML(example || '')}
         </div>
       `).join('')}
       ` : ''}
       
-      ${chapter.tryItYourself && chapter.tryItYourself.length > 0 ? `
+      ${Array.isArray(chapter.tryItYourself) && chapter.tryItYourself.length > 0 ? `
       <h3>🚀 Try It Yourself</h3>
       ${chapter.tryItYourself.map((exercise, idx) => `
         <div class="try-it">
-          <strong>${idx + 1}.</strong> ${markdownToHTML(exercise)}
+          <strong>${idx + 1}.</strong> ${markdownToHTML(exercise || '')}
         </div>
       `).join('')}
       ` : ''}
       
-      ${chapter.toolWalkthrough ? `
-        <h3>🛠️ Tool Walkthrough: ${chapter.toolWalkthrough.toolName}</h3>
+      ${chapter.toolWalkthrough && Array.isArray(chapter.toolWalkthrough.steps) ? `
+        <h3>🛠️ Tool Walkthrough: ${chapter.toolWalkthrough.toolName || 'Tool Guide'}</h3>
         <div class="tool-walkthrough">
-          <p>${chapter.toolWalkthrough.description}</p>
+          <p>${chapter.toolWalkthrough.description || ''}</p>
           <ol>
-            ${chapter.toolWalkthrough.steps.map(step => `<li>${markdownToHTML(step)}</li>`).join('')}
+            ${chapter.toolWalkthrough.steps.map(step => `<li>${markdownToHTML(step || '')}</li>`).join('')}
           </ol>
         </div>
       ` : ''}
@@ -472,16 +476,22 @@ export default function CourseView({ userProfile }: CourseViewProps) {
 </html>
     `
 
-    // Create download
-    const blob = new Blob([htmlContent], { type: 'text/html' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${course.title.replace(/[^a-z0-9]/gi, '_')}.html`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+      // Create download
+      const blob = new Blob([htmlContent], { type: 'text/html' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${course.title.replace(/[^a-z0-9]/gi, '_')}.html`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      
+      console.log('✅ HTML export successful')
+    } catch (error: any) {
+      console.error('❌ HTML export failed:', error)
+      alert(`Failed to export HTML: ${error.message || 'Unknown error'}. Please try again or check the console for details.`)
+    }
   }
 
   if (loading) {
@@ -583,12 +593,27 @@ export default function CourseView({ userProfile }: CourseViewProps) {
       )
     }
 
+    const handleNextChapter = () => {
+      if (selectedChapter < 10) {
+        setSelectedChapter(selectedChapter + 1)
+      }
+    }
+    
+    const handlePrevChapter = () => {
+      if (selectedChapter > 1) {
+        setSelectedChapter(selectedChapter - 1)
+      }
+    }
+
     return (
       <ChapterCard
         chapter={chapter}
         onBack={handleBackToCourse}
         onComplete={() => handleChapterComplete(selectedChapter)}
         isCompleted={progress?.completedChapters.includes(selectedChapter) || false}
+        onNext={selectedChapter < 10 ? handleNextChapter : undefined}
+        onPrev={selectedChapter > 1 ? handlePrevChapter : undefined}
+        totalChapters={10}
       />
     )
   }
