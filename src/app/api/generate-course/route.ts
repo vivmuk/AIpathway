@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
             }
           ],
           temperature: 0.7,
-          max_tokens: 100000, // High token limit for comprehensive content generation
+          max_tokens: 20000, // Reasonable limit for 10 detailed chapters with examples
         response_format: {
           type: 'json_schema',
           json_schema: {
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
                 { role: 'user', content: prompt }
               ],
               temperature: 0.7,
-              max_tokens: 100000,
+              max_tokens: 20000, // Reasonable limit for 10 detailed chapters
               response_format: {
                 type: 'json_schema',
                 json_schema: {
@@ -409,6 +409,8 @@ Throughout the curriculum, naturally incorporate these evidence-based principles
 7. Make it engaging, practical, and immediately useful
 8. Use conversational but professional tone
 9. Include specific, actionable exercises that learners can do with free/accessible AI tools
+
+**CRITICAL REMINDER: You MUST generate ALL 10 chapters (chapterNumber 1 through 10). Do not generate fewer than 10 chapters. Each chapter should be comprehensive with 500-800 words of content.**
 
 Return ONLY valid JSON matching the schema. No additional text.`
 }
