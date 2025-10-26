@@ -256,10 +256,10 @@ export default function CourseView({ userProfile }: CourseViewProps) {
       }
 
       // Helper to wrap and add text
-      const addWrappedText = (text: string, fontSize: number, fontStyle: string = 'normal', color: number[] = [0, 0, 0]) => {
+      const addWrappedText = (text: string, fontSize: number, fontStyle: string = 'normal', color: [number, number, number] = [0, 0, 0]) => {
         doc.setFontSize(fontSize)
         doc.setFont('helvetica', fontStyle)
-        doc.setTextColor(...color)
+        doc.setTextColor(color[0], color[1], color[2])
         
         const lines = doc.splitTextToSize(text, maxWidth)
         const lineHeight = fontSize * 0.5
