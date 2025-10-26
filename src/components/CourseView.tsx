@@ -15,6 +15,8 @@ export default function CourseView({ userProfile }: CourseViewProps) {
   const [error, setError] = useState<string | null>(null)
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null)
   const [progress, setProgress] = useState<Progress | null>(null)
+  const [generationProgress, setGenerationProgress] = useState<string>('Preparing...')
+  const [chaptersGenerated, setChaptersGenerated] = useState<number>(0)
 
   useEffect(() => {
     generateCourse()
@@ -25,9 +27,11 @@ export default function CourseView({ userProfile }: CourseViewProps) {
     setError(null)
 
     try {
-      console.log('🚀 Generating course...')
+      // Step 1: Generate course outline
+      console.log('📋 Step 1: Generating course outline...')
+      setGenerationProgress('Creating your personalized course outline...')
       
-      const response = await fetch('/api/generate-course', {
+      const outlineResponse = await fetch('/api/generate-outline', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -35,19 +39,93 @@ export default function CourseView({ userProfile }: CourseViewProps) {
         body: JSON.stringify({ userProfile }),
       })
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        console.error('❌ API Error:', errorData)
-        throw new Error(errorData.error || 'Failed to generate course')
+      if (!outlineResponse.ok) {
+        const errorData = await outlineResponse.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to generate outline')
       }
 
-      const data = await response.json()
-      console.log('✅ Course generated successfully')
-      setCourse(data.course)
+      const { outline } = await outlineResponse.json()
+      console.log('✅ Outline generated:', outline.title)
+      
+      // Create initial course object with empty chapters
+      const courseId = `course-${Date.now()}`
+      const initialCourse: Course = {
+        id: courseId,
+        title: outline.title,
+        subtitle: outline.subtitle,
+        overallDescription: outline.overallDescription,
+        generatedAt: new Date().toISOString(),
+        userProfile,
+        chapters: outline.chapters.map((ch: any) => ({
+          ...ch,
+          content: '',
+          keyTerms: [],
+          examples: [],
+          tryItYourself: [],
+          toolWalkthrough: null
+        }))
+      }
+      
+      setCourse(initialCourse)
+      
+      // Step 2: Generate each chapter with Mistral
+      console.log('📖 Step 2: Generating chapters with Mistral...')
+      const fullChapters = []
+      
+      for (let i = 0; i < outline.chapters.length; i++) {
+        const chapterOutline = outline.chapters[i]
+        setGenerationProgress(`Generating Chapter ${i + 1} of 10: ${chapterOutline.title}`)
+        setChaptersGenerated(i)
+        
+        try {
+          const chapterResponse = await fetch('/api/generate-chapter', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              chapterOutline,
+              userProfile,
+              courseTitle: outline.title
+            }),
+          })
+
+          if (chapterResponse.ok) {
+            const { chapter } = await chapterResponse.json()
+            fullChapters.push(chapter)
+            console.log(`✅ Chapter ${i + 1} complete`)
+            
+            // Update course with generated chapter
+            const updatedCourse = {
+              ...initialCourse,
+              chapters: initialCourse.chapters.map((ch, idx) => 
+                idx < fullChapters.length ? fullChapters[idx] : ch
+              )
+            }
+            setCourse(updatedCourse)
+            setChaptersGenerated(i + 1)
+          } else {
+            console.warn(`⚠️ Chapter ${i + 1} failed, using outline only`)
+            fullChapters.push(initialCourse.chapters[i])
+          }
+        } catch (chapterError) {
+          console.error(`❌ Error generating chapter ${i + 1}:`, chapterError)
+          fullChapters.push(initialCourse.chapters[i])
+        }
+      }
+      
+      // Final course with all chapters
+      const finalCourse = {
+        ...initialCourse,
+        chapters: fullChapters
+      }
+      
+      setCourse(finalCourse)
+      console.log('✅ All chapters generated!')
 
       // Initialize progress
       const newProgress: Progress = {
-        courseId: data.course.id,
+        courseId: finalCourse.id,
         completedChapters: [],
         currentChapter: 1,
         startedAt: new Date().toISOString(),
@@ -56,7 +134,7 @@ export default function CourseView({ userProfile }: CourseViewProps) {
       setProgress(newProgress)
 
       // Save to localStorage
-      localStorage.setItem('aipathway_course', JSON.stringify(data.course))
+      localStorage.setItem('aipathway_course', JSON.stringify(finalCourse))
       localStorage.setItem('aipathway_progress', JSON.stringify(newProgress))
     } catch (err: any) {
       setError(err.message || 'An error occurred while generating your course')
@@ -356,6 +434,18 @@ export default function CourseView({ userProfile }: CourseViewProps) {
         <div className="bg-white rounded-xl shadow-lg p-12 text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-6"></div>
           <h2 className="text-2xl font-semibold mb-2">Generating Your Personalized Course...</h2>
+          <p className="text-gray-600 mb-4">{generationProgress}</p>
+          {chaptersGenerated > 0 && (
+            <div className="mt-6">
+              <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
+                <div 
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-500"
+                  style={{ width: `${(chaptersGenerated / 10) * 100}%` }}
+                ></div>
+              </div>
+              <p className="text-sm text-gray-500">Chapter {chaptersGenerated} of 10 complete</p>
+            </div>
+          )}
           <p className="text-gray-600 mb-4">
             Our AI is crafting a custom 10-chapter curriculum just for you
           </p>
