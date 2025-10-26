@@ -17,14 +17,24 @@ export default function CourseView({ userProfile }: CourseViewProps) {
   const [progress, setProgress] = useState<Progress | null>(null)
   const [generationProgress, setGenerationProgress] = useState<string>('Preparing...')
   const [chaptersGenerated, setChaptersGenerated] = useState<number>(0)
+  const [isGenerating, setIsGenerating] = useState(false)
 
   useEffect(() => {
     generateCourse()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const generateCourse = async () => {
+    // Prevent duplicate generation
+    if (isGenerating) {
+      console.log('⚠️ Generation already in progress, skipping...')
+      return
+    }
+    
+    setIsGenerating(true)
     setLoading(true)
     setError(null)
+    setChaptersGenerated(0)
 
     try {
       // Step 1: Generate course outline
@@ -140,6 +150,7 @@ export default function CourseView({ userProfile }: CourseViewProps) {
       setError(err.message || 'An error occurred while generating your course')
     } finally {
       setLoading(false)
+      setIsGenerating(false)
     }
   }
 
