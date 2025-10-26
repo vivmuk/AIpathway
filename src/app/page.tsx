@@ -54,7 +54,7 @@ export default function Home() {
                   🚀 Powered by Advanced AI
                 </span>
               </div>
-              <h1 className="text-6xl md:text-7xl font-black mb-4 leading-none tracking-tight display-font" style={{ color: '#F28C38' }}>
+              <h1 className="text-6xl md:text-7xl font-black mb-4 leading-none tracking-tight" style={{ color: '#F28C38' }}>
                 AIPathway
               </h1>
               <p className="text-2xl md:text-3xl mb-3 font-black" style={{ color: '#000000' }}>
@@ -130,7 +130,7 @@ export default function Home() {
 
             {/* Benefits Section */}
             <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200">
-              <h2 className="text-3xl font-black mb-6 display-font" style={{ color: '#F28C38' }}>What You Get</h2>
+              <h2 className="text-3xl font-black mb-6" style={{ color: '#F28C38' }}>What You Get</h2>
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ backgroundColor: '#F15A24' }}>

@@ -15,9 +15,6 @@
     @apply min-h-screen;
     font-weight: 400;
   }
-  h1, h2, h3, .display-font {
-    font-family: var(--font-display), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  }
 }
 
 @layer utilities {

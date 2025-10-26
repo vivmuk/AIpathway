@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     
     // Create abort controller for timeout
     const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 120000) // 2 minute timeout
+    const timeout = setTimeout(() => controller.abort(), 300000) // 5 minute timeout
     
     try {
       // First attempt with qwen3-235b (supports response_format)

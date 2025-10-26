@@ -1,17 +1,11 @@
 import type { Metadata } from 'next'
-import { Inter, Playfair_Display } from 'next/font/google'
+import { Montserrat } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({ 
+const montserrat = Montserrat({ 
   subsets: ['latin'],
   weight: ['400', '500', '600', '700', '800', '900'],
-  variable: '--font-inter'
-})
-
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  weight: ['600', '700', '800', '900'],
-  variable: '--font-display'
+  variable: '--font-montserrat'
 })
 
 export const metadata: Metadata = {
@@ -29,7 +23,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
-      <body className={`${inter.className} ${playfair.variable}`}>{children}</body>
+      <body className={montserrat.className}>{children}</body>
     </html>
   )
 }
