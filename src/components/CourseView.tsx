@@ -20,6 +20,29 @@ export default function CourseView({ userProfile }: CourseViewProps) {
   const [isGenerating, setIsGenerating] = useState(false)
 
   useEffect(() => {
+    // Check if there's a cached course for this user profile
+    const cachedCourse = localStorage.getItem('aipathway_course')
+    const cachedProgress = localStorage.getItem('aipathway_progress')
+    
+    if (cachedCourse && cachedProgress) {
+      try {
+        const parsedCourse = JSON.parse(cachedCourse)
+        const parsedProgress = JSON.parse(cachedProgress)
+        
+        // Check if it's for the same user profile (simple check)
+        if (parsedCourse.userProfile?.personaType === userProfile.personaType) {
+          console.log('✅ Found cached course, loading...')
+          setCourse(parsedCourse)
+          setProgress(parsedProgress)
+          setLoading(false)
+          return
+        }
+      } catch (e) {
+        console.error('Failed to load cached course:', e)
+      }
+    }
+    
+    // No cache or different profile, generate new course
     generateCourse()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -190,7 +213,23 @@ export default function CourseView({ userProfile }: CourseViewProps) {
   }
 
   const handleExportHTML = () => {
-    if (!course) return
+    if (!course) {
+      alert('No course to export')
+      return
+    }
+    
+    // Check if chapters have content
+    const chaptersWithContent = course.chapters.filter(ch => ch.content && ch.content.trim() !== '')
+    if (chaptersWithContent.length === 0) {
+      alert('Please wait for chapters to finish generating before exporting.')
+      return
+    }
+    
+    if (chaptersWithContent.length < course.chapters.length) {
+      if (!confirm(`Only ${chaptersWithContent.length} of ${course.chapters.length} chapters have content. Export anyway?`)) {
+        return
+      }
+    }
 
     // Helper function to convert markdown to HTML
     const markdownToHTML = (markdown: string) => {
@@ -371,7 +410,7 @@ export default function CourseView({ userProfile }: CourseViewProps) {
   </div>
   <hr style="border: none; border-top: 2px solid #e5e7eb; margin: 40px 0;">
   
-  ${course.chapters.map(chapter => `
+  ${course.chapters.filter(ch => ch.content && ch.content.trim() !== '').map(chapter => `
     <div class="chapter">
       <div class="chapter-header">
         <h2 style="color: white; border: none; margin: 0; padding: 0;">Chapter ${chapter.chapterNumber}: ${chapter.title}</h2>
@@ -385,26 +424,32 @@ export default function CourseView({ userProfile }: CourseViewProps) {
         ${markdownToHTML(chapter.content)}
       </div>
       
+      ${chapter.keyTerms && chapter.keyTerms.length > 0 ? `
       <h3>🔑 Key Terms</h3>
       ${chapter.keyTerms.map(term => `
         <div class="key-term">
           <strong>${term.term}:</strong> ${term.definition}
         </div>
       `).join('')}
+      ` : ''}
       
+      ${chapter.examples && chapter.examples.length > 0 ? `
       <h3>💡 Real-World Examples</h3>
       ${chapter.examples.map((example, idx) => `
         <div class="example">
           <strong>Example ${idx + 1}:</strong> ${markdownToHTML(example)}
         </div>
       `).join('')}
+      ` : ''}
       
+      ${chapter.tryItYourself && chapter.tryItYourself.length > 0 ? `
       <h3>🚀 Try It Yourself</h3>
       ${chapter.tryItYourself.map((exercise, idx) => `
         <div class="try-it">
           <strong>${idx + 1}.</strong> ${markdownToHTML(exercise)}
         </div>
       `).join('')}
+      ` : ''}
       
       ${chapter.toolWalkthrough ? `
         <h3>🛠️ Tool Walkthrough: ${chapter.toolWalkthrough.toolName}</h3>
@@ -504,7 +549,39 @@ export default function CourseView({ userProfile }: CourseViewProps) {
 
   if (selectedChapter !== null) {
     const chapter = course.chapters.find(c => c.chapterNumber === selectedChapter)
-    if (!chapter) return null
+    
+    if (!chapter) {
+      console.error('❌ Chapter not found:', selectedChapter)
+      return (
+        <div className="max-w-4xl mx-auto p-8 bg-red-50 rounded-xl">
+          <h2 className="text-2xl font-bold text-red-600 mb-2">Chapter Not Found</h2>
+          <p className="text-gray-700 mb-4">Unable to load Chapter {selectedChapter}</p>
+          <button
+            onClick={handleBackToCourse}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            ← Back to Course
+          </button>
+        </div>
+      )
+    }
+
+    // Check if chapter has content
+    if (!chapter.content || chapter.content.trim() === '') {
+      console.warn('⚠️ Chapter has no content:', selectedChapter)
+      return (
+        <div className="max-w-4xl mx-auto p-8 bg-yellow-50 rounded-xl">
+          <h2 className="text-2xl font-bold text-yellow-600 mb-2">Chapter Still Loading</h2>
+          <p className="text-gray-700 mb-4">Chapter {selectedChapter}: {chapter.title} is being generated...</p>
+          <button
+            onClick={handleBackToCourse}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            ← Back to Course
+          </button>
+        </div>
+      )
+    }
 
     return (
       <ChapterCard
