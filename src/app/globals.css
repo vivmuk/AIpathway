@@ -10,9 +10,13 @@
 
   body {
     @apply bg-white;
-    @apply text-gray-900;
+    /* Body text to charcoal for consulting aesthetic */
+    color: #333333;
     @apply min-h-screen;
     font-weight: 400;
+  }
+  h1, h2, h3, .display-font {
+    font-family: var(--font-display), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   }
 }
 

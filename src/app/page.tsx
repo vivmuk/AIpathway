@@ -49,12 +49,12 @@ export default function Home() {
           <div className="max-w-6xl mx-auto animate-fade-in">
             {/* Hero Section */}
             <div className="text-center mb-12 relative">
-              <div className="inline-block mb-4 px-4 py-2 bg-orange-50 rounded-full border border-orange-200">
+              <div className="inline-block mb-4 px-4 py-2 rounded-full border" style={{ backgroundColor: '#fff5ed', borderColor: '#ffd5c2' }}>
                 <span className="text-sm font-semibold" style={{ color: '#F15A24' }}>
                   🚀 Powered by Advanced AI
                 </span>
               </div>
-              <h1 className="text-6xl md:text-7xl font-black mb-4 leading-none tracking-tight" style={{ color: '#F28C38' }}>
+              <h1 className="text-6xl md:text-7xl font-black mb-4 leading-none tracking-tight display-font" style={{ color: '#F28C38' }}>
                 AIPathway
               </h1>
               <p className="text-2xl md:text-3xl mb-3 font-black" style={{ color: '#000000' }}>
@@ -115,7 +115,7 @@ export default function Home() {
                   onClick={handleStartQuiz}
                   className="group relative inline-flex items-center justify-center px-10 py-4 text-lg font-bold overflow-hidden rounded-full shadow-sm hover:shadow-md transition-all duration-300 bg-white text-gray-900"
                   style={{ borderWidth: '2px', borderColor: '#666666' }}
-                  onMouseEnter={(e) => e.currentTarget.style.borderColor = '#F15A24'}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = '#E53935'}
                   onMouseLeave={(e) => e.currentTarget.style.borderColor = '#666666'}
                 >
                   <span className="relative flex items-center gap-2">
@@ -130,7 +130,7 @@ export default function Home() {
 
             {/* Benefits Section */}
             <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200">
-              <h2 className="text-3xl font-black mb-6" style={{ color: '#F28C38' }}>What You Get</h2>
+              <h2 className="text-3xl font-black mb-6 display-font" style={{ color: '#F28C38' }}>What You Get</h2>
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ backgroundColor: '#F15A24' }}>
