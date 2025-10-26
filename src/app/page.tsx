@@ -35,6 +35,10 @@ export default function Home() {
   }
 
   const handleRestartQuiz = () => {
+    // Clear cached course data
+    localStorage.removeItem('aipathway_course')
+    localStorage.removeItem('aipathway_progress')
+    
     setUserProfile(null)
     setCourse(null)
     setStep('welcome')

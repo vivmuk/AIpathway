@@ -16,8 +16,6 @@ export async function POST(request: NextRequest) {
       courseTitle: string
     }
 
-    console.log(`📖 Generating Chapter ${chapterOutline.chapterNumber}: ${chapterOutline.title}`)
-
     const VENICE_API_KEY = 'ntmhtbP2fr_pOQsmuLPuN_nm6lm2INWKiNcvrdEfEC'
     const VENICE_API_URL = 'https://api.venice.ai/api/v1'
     

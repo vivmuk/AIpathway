@@ -29,16 +29,25 @@ export default function CourseView({ userProfile }: CourseViewProps) {
         const parsedCourse = JSON.parse(cachedCourse)
         const parsedProgress = JSON.parse(cachedProgress)
         
-        // Check if it's for the same user profile (simple check)
-        if (parsedCourse.userProfile?.personaType === userProfile.personaType) {
-          console.log('✅ Found cached course, loading...')
+        // Validate cache: same profile AND has expected chapter count
+        const expectedChapters = parsedCourse.chapters?.length || 0
+        const isSameProfile = parsedCourse.userProfile?.personaType === userProfile.personaType
+        const hasValidChapters = expectedChapters > 0
+        
+        if (isSameProfile && hasValidChapters) {
           setCourse(parsedCourse)
           setProgress(parsedProgress)
           setLoading(false)
           return
+        } else {
+          // Clear invalid cache
+          localStorage.removeItem('aipathway_course')
+          localStorage.removeItem('aipathway_progress')
         }
       } catch (e) {
-        console.error('Failed to load cached course:', e)
+        // Clear corrupted cache
+        localStorage.removeItem('aipathway_course')
+        localStorage.removeItem('aipathway_progress')
       }
     }
     
@@ -50,7 +59,6 @@ export default function CourseView({ userProfile }: CourseViewProps) {
   const generateCourse = async () => {
     // Prevent duplicate generation
     if (isGenerating) {
-      console.log('⚠️ Generation already in progress, skipping...')
       return
     }
     
@@ -61,7 +69,6 @@ export default function CourseView({ userProfile }: CourseViewProps) {
 
     try {
       // Step 1: Generate course outline
-      console.log('📋 Step 1: Generating course outline...')
       setGenerationProgress('Creating your personalized course outline...')
       
       const outlineResponse = await fetch('/api/generate-outline', {
@@ -236,33 +243,36 @@ export default function CourseView({ userProfile }: CourseViewProps) {
       }
 
       // Helper function to convert markdown to HTML
-    const markdownToHTML = (markdown: string) => {
-      return markdown
-        // Headers
-        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-        // Bold
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        // Italic
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        // Code blocks
-        .replace(/```(.*?)```/gs, '<pre><code>$1</code></pre>')
-        // Inline code
-        .replace(/`(.*?)`/g, '<code>$1</code>')
-        // Links
-        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>')
-        // Lists
-        .replace(/^\* (.*$)/gim, '<li>$1</li>')
-        .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
-        // Line breaks
-        .replace(/\n\n/g, '</p><p>')
-        // Blockquotes
-        .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
-    }
+      const markdownToHTML = (markdown: string | undefined | null): string => {
+        if (!markdown || typeof markdown !== 'string') {
+          return ''
+        }
+        return markdown
+          // Headers
+          .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+          .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+          .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+          // Bold
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          // Italic
+          .replace(/\*(.*?)\*/g, '<em>$1</em>')
+          // Code blocks
+          .replace(/```(.*?)```/gs, '<pre><code>$1</code></pre>')
+          // Inline code
+          .replace(/`(.*?)`/g, '<code>$1</code>')
+          // Links
+          .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>')
+          // Lists
+          .replace(/^\* (.*$)/gim, '<li>$1</li>')
+          .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+          // Line breaks
+          .replace(/\n\n/g, '</p><p>')
+          // Blockquotes
+          .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
+      }
 
-    // Generate HTML content with proper markdown rendering
-    const htmlContent = `
+      // Generate HTML content with proper markdown rendering
+      const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
 <head>

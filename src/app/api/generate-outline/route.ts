@@ -6,8 +6,6 @@ export async function POST(request: NextRequest) {
   try {
     const { userProfile } = await request.json() as { userProfile: UserProfile }
 
-    console.log(`📋 Generating course outline (${CHAPTER_COUNT} chapters)...`)
-
     const VENICE_API_KEY = 'ntmhtbP2fr_pOQsmuLPuN_nm6lm2INWKiNcvrdEfEC'
     const VENICE_API_URL = 'https://api.venice.ai/api/v1'
     
@@ -77,17 +75,14 @@ export async function POST(request: NextRequest) {
 
       if (!veniceResponse.ok) {
         const errorText = await veniceResponse.text()
-        console.error('❌ Outline API error:', errorText)
         return NextResponse.json(
-          { error: `Outline generation failed: ${veniceResponse.statusText}` },
+          { error: `Outline generation failed: ${veniceResponse.statusText}`, details: errorText },
           { status: 500 }
         )
       }
 
       const data = await veniceResponse.json()
       const outline = JSON.parse(data.choices[0].message.content)
-      
-      console.log('✅ Course outline generated:', outline.title)
       
       return NextResponse.json({ outline })
       
@@ -102,7 +97,6 @@ export async function POST(request: NextRequest) {
       throw fetchError
     }
   } catch (error: any) {
-    console.error('💥 Outline generation error:', error)
     return NextResponse.json(
       { error: error.message || 'Failed to generate outline' },
       { status: 500 }

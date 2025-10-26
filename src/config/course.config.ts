@@ -16,5 +16,3 @@ export const CHAPTER_TIMEOUT = 300000 // 5 minutes
 export const OUTLINE_MODEL = 'qwen3-235b'
 export const CHAPTER_MODEL = 'mistral-31-24b'
 
-console.log(`📚 Course config loaded: ${CHAPTER_COUNT} chapters (${process.env.NODE_ENV})`)
-
