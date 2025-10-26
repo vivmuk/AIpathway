@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
             }
           ],
           temperature: 0.7,
-          max_tokens: 20000, // Reasonable limit for 10 detailed chapters with examples
+          max_tokens: 80000, // User requested 80K output; qwen3-235b has 131K total context
         response_format: {
           type: 'json_schema',
           json_schema: {
@@ -56,6 +56,8 @@ export async function POST(request: NextRequest) {
                 overallDescription: { type: 'string' },
                 chapters: {
                   type: 'array',
+                  minItems: 10,
+                  maxItems: 10,
                   items: {
                     type: 'object',
                     properties: {
@@ -129,7 +131,7 @@ export async function POST(request: NextRequest) {
                 { role: 'user', content: prompt }
               ],
               temperature: 0.7,
-              max_tokens: 20000, // Reasonable limit for 10 detailed chapters
+              max_tokens: 25000, // venice-uncensored has 32K total; leaving room for prompt
               response_format: {
                 type: 'json_schema',
                 json_schema: {
@@ -143,6 +145,8 @@ export async function POST(request: NextRequest) {
                       overallDescription: { type: 'string' },
                       chapters: {
                         type: 'array',
+                        minItems: 10,
+                        maxItems: 10,
                         items: {
                           type: 'object',
                           properties: {
