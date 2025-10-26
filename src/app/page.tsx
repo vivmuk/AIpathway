@@ -4,11 +4,12 @@ import { useState } from 'react'
 import Quiz from '@/components/Quiz'
 import PersonaSelector from '@/components/PersonaSelector'
 import CourseView from '@/components/CourseView'
+import OneOffLesson from '@/components/OneOffLesson'
 import Header from '@/components/Header'
 import { UserProfile, Course } from '@/types'
 
 export default function Home() {
-  const [step, setStep] = useState<'welcome' | 'persona' | 'quiz' | 'course'>('welcome')
+  const [step, setStep] = useState<'welcome' | 'persona' | 'quiz' | 'course' | 'lesson'>('welcome')
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [course, setCourse] = useState<Course | null>(null)
 
@@ -41,6 +42,14 @@ export default function Home() {
     
     setUserProfile(null)
     setCourse(null)
+    setStep('welcome')
+  }
+
+  const handleStartLesson = () => {
+    setStep('lesson')
+  }
+
+  const handleBackFromLesson = () => {
     setStep('welcome')
   }
 
@@ -126,9 +135,28 @@ export default function Home() {
                     ✨ Custom Quiz
                   </span>
                 </button>
+
+                {/* Quick Lesson */}
+                <button
+                  onClick={handleStartLesson}
+                  className="group relative inline-flex items-center justify-center px-10 py-4 text-lg font-bold overflow-hidden rounded-full shadow-sm hover:shadow-md transition-all duration-300 bg-white text-gray-900"
+                  style={{ borderWidth: '2px', borderColor: '#F28C38' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#F15A24'
+                    e.currentTarget.style.backgroundColor = '#FFF5ED'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#F28C38'
+                    e.currentTarget.style.backgroundColor = '#ffffff'
+                  }}
+                >
+                  <span className="relative flex items-center gap-2">
+                    📚 Quick Lesson
+                  </span>
+                </button>
               </div>
               <p className="mt-4 text-sm font-normal" style={{ color: '#666666' }}>
-                Choose a preset persona or customize your path
+                Full course, custom quiz, or quick lesson on any topic
               </p>
             </div>
 
@@ -190,6 +218,10 @@ export default function Home() {
 
         {step === 'course' && userProfile && (
           <CourseView userProfile={userProfile} />
+        )}
+
+        {step === 'lesson' && (
+          <OneOffLesson onBack={handleBackFromLesson} />
         )}
       </main>
 
