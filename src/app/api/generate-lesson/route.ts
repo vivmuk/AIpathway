@@ -22,26 +22,36 @@ export async function POST(request: NextRequest) {
 
     const levelDescription = levelDescriptions[knowledgeLevel] || levelDescriptions.intermediate
 
-    const prompt = `Create a comprehensive lesson on "${topic}" for ${levelDescription}.
+    const prompt = `Create a comprehensive ARTIFICIAL INTELLIGENCE / GENERATIVE AI lesson on "${topic}" for ${levelDescription}.
 
-**YOU MUST GENERATE REAL CONTENT, NOT PLACEHOLDER TEXT.**
+**CRITICAL CONTEXT: This lesson MUST be about Artificial Intelligence and Generative AI technology.**
+- "${topic}" should be interpreted in the context of AI/GenAI ONLY
+- If "${topic}" contains ambiguous terms (like "RAG"), interpret them as AI concepts (RAG = Retrieval-Augmented Generation, NOT project management)
+- Focus on AI tools, AI applications, AI concepts, AI implementation
+- NO non-AI interpretations of the topic
+
+**YOU MUST GENERATE REAL AI/GENAI CONTENT, NOT PLACEHOLDER TEXT.**
 
 **Requirements:**
-1. Write a detailed 400-600 word explanation of "${topic}" in markdown format
+1. Write a detailed 400-600 word explanation of "${topic}" in the context of AI/GenAI in markdown format
    - Use ## headers, **bold**, *italic*, \`code\`, bullet points
-   - Make it engaging and educational
+   - Make it engaging and educational about AI technology
+   - Focus on AI tools, AI applications, or AI concepts
    
-2. Define 3-5 key terms related to ${topic}
-   - Each term should have a clear, specific definition
+2. Define 3-5 key AI/GenAI terms related to ${topic}
+   - Each term should be AI-specific with a clear definition
+   - Examples: embeddings, tokens, fine-tuning, RAG (Retrieval-Augmented Generation), vector database, etc.
    - Not generic placeholders like "string"
    
-3. Provide 2-3 real-world examples of ${topic} in action
-   - Specific, concrete examples from industry
+3. Provide 2-3 real-world AI/GenAI examples of ${topic} in action
+   - Specific examples of AI tools or AI applications
+   - Concrete examples from AI industry or AI implementation
    
-4. Create 2-3 practical exercises the learner can try
-   - Actionable, hands-on activities
+4. Create 2-3 practical exercises the learner can try with AI tools
+   - Actionable, hands-on activities using ChatGPT, Claude, or other AI tools
+   - Focus on experimenting with AI
 
-**CRITICAL**: Generate REAL educational content about "${topic}", not placeholder values. The user is learning about ${topic} at a ${knowledgeLevel} level.
+**CRITICAL**: Generate REAL educational content about "${topic}" in the context of ARTIFICIAL INTELLIGENCE AND GENERATIVE AI, not placeholder values. The user is learning about ${topic} as it relates to AI/GenAI at a ${knowledgeLevel} level.
 
 Return ONLY valid JSON with these exact fields:
 {
@@ -66,7 +76,7 @@ Return ONLY valid JSON with these exact fields:
           messages: [
             {
               role: 'system',
-              content: 'You are an expert AI educator. Create detailed, engaging lessons with real educational content. Generate comprehensive explanations, not placeholder text. Respond with ONLY valid JSON.'
+              content: 'You are an expert Artificial Intelligence and Generative AI educator. Create detailed, engaging lessons about AI/GenAI with real educational content. All topics must be interpreted in the context of AI technology (LLMs, AI tools, AI concepts, AI applications). Generate comprehensive AI explanations, not placeholder text. Respond with ONLY valid JSON.'
             },
             {
               role: 'user',

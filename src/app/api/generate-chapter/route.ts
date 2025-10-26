@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
           messages: [
             {
               role: 'system',
-              content: 'You are an expert AI educator. Create detailed, engaging chapter content with examples and exercises. Respond with ONLY valid JSON.'
+              content: 'You are an expert Artificial Intelligence and Generative AI educator. Create detailed, engaging chapter content about AI/GenAI topics with AI-specific examples and hands-on AI exercises. All content must be about AI technology (LLMs, AI tools, AI concepts, AI applications). Respond with ONLY valid JSON.'
             },
             {
               role: 'user',
@@ -157,7 +157,13 @@ function buildChapterPrompt(outline: ChapterOutline, profile: UserProfile, cours
                     profile.aiScore < 75 ? 'intermediate to advanced' :
                     'advanced and technical'
 
-  return `You are creating Chapter ${outline.chapterNumber} for the course "${courseTitle}".
+  return `You are creating Chapter ${outline.chapterNumber} for the ARTIFICIAL INTELLIGENCE course "${courseTitle}".
+
+**CRITICAL: This chapter MUST be about Artificial Intelligence / Generative AI technology.**
+- ALL content must relate to AI/GenAI (Large Language Models, AI tools, AI applications, AI concepts)
+- If the chapter mentions terms like "RAG" - it means Retrieval-Augmented Generation (AI concept), NOT Red-Amber-Green project management
+- Focus on AI-specific concepts: LLMs, prompt engineering, AI agents, vector databases, embeddings, fine-tuning, AI ethics, AI implementation, etc.
+- Examples should demonstrate AI tools and AI applications (ChatGPT, Claude, Gemini, Midjourney, AI APIs, etc.)
 
 **Chapter Details:**
 - Chapter Number: ${outline.chapterNumber}
@@ -171,22 +177,27 @@ function buildChapterPrompt(outline: ChapterOutline, profile: UserProfile, cours
 - Learning Style: ${profile.learningStyle}
 
 **Content Requirements:**
-1. **Content**: Write 600-800 words of detailed, engaging content in markdown format
+1. **Content**: Write 600-800 words of detailed, engaging content in markdown format ABOUT AI/GENAI
    - Use headers (##), lists, **bold**, *italic*, code blocks where appropriate
-   - Make it practical and immediately useful
-   - Focus on Generative AI tools and applications
-   - Include real-world context and scenarios
+   - Make it practical and immediately useful for working with AI
+   - Focus exclusively on Generative AI tools, AI concepts, and AI applications
+   - Include real-world AI use cases and AI implementation scenarios
+   - If discussing RAG, explain it as an AI architecture (Retrieval-Augmented Generation)
    
-2. **Key Terms**: Provide 3-5 important terms with clear definitions
+2. **Key Terms**: Provide 3-5 important AI/GenAI terms with clear definitions
+   - Terms should be AI-specific (e.g., "embeddings", "tokens", "context window", "temperature", "RAG", etc.)
 
-3. **Examples**: Give 2-3 real-world examples${profile.industry ? ` relevant to ${profile.industry}` : ''}
+3. **Examples**: Give 2-3 real-world AI/GenAI examples${profile.industry ? ` relevant to ${profile.industry}` : ''}
+   - Show how AI tools are used in practice
+   - Include specific AI applications or use cases
 
-4. **Try It Yourself**: Create 2-3 hands-on exercises using free GenAI tools (ChatGPT, Claude, etc.)
+4. **Try It Yourself**: Create 2-3 hands-on exercises using free GenAI tools (ChatGPT, Claude, Perplexity, etc.)
    - Format prompt exercises using GCSE template when relevant:
      **Goal**: What you want | **Context**: Why/who | **Source**: What info | **Expectations**: How to respond
+   - Focus on AI tool usage and AI experimentation
 
-5. **Tool Walkthrough**: ${outline.chapterNumber <= 5 ? 'Include a practical tool walkthrough (ChatGPT, Claude, Perplexity, etc.) with step-by-step instructions' : 'Optional - include if relevant to the chapter'}
+5. **Tool Walkthrough**: ${outline.chapterNumber <= 5 ? 'Include a practical AI tool walkthrough (ChatGPT, Claude, Perplexity, etc.) with step-by-step instructions' : 'Optional - include if relevant to the AI concepts in this chapter'}
 
-Make the content conversational, professional, and actionable. Return ONLY valid JSON matching the schema.`
+Make the content conversational, professional, and actionable. ALL content MUST be about Artificial Intelligence and Generative AI. Return ONLY valid JSON matching the schema.`
 }
 

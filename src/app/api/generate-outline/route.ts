@@ -27,15 +27,15 @@ export async function POST(request: NextRequest) {
           messages: [
             {
               role: 'system',
-              content: `You are an expert AI curriculum designer. Generate a course outline with ${CHAPTER_COUNT} chapter titles and objectives. Respond with ONLY valid JSON.`
+              content: `You are an expert Artificial Intelligence and Generative AI curriculum designer. Generate a course outline about AI/GenAI with ${CHAPTER_COUNT} chapter titles and objectives. All topics must be about AI technology (LLMs, ChatGPT, Claude, prompt engineering, AI agents, RAG systems, AI implementation, etc.). Respond with ONLY valid JSON.`
             },
             {
               role: 'user',
               content: prompt
             }
           ],
-          temperature: 0.5, // Lower temperature for faster, more focused responses
-          max_tokens: 3000, // Reduced for faster generation (outline is typically <2000 tokens)
+          temperature: 0.7,
+          max_tokens: 5000,
           response_format: {
             type: 'json_schema',
             json_schema: {
@@ -117,21 +117,28 @@ function buildOutlinePrompt(profile: UserProfile, chapterCount: number): string 
                     profile.aiScore < 75 ? 'intermediate to advanced' :
                     'advanced and technical'
 
-  return `Create a ${chapterCount}-chapter AI learning curriculum outline for ${personaDescriptions[profile.personaType]}.
+  return `Create a ${chapterCount}-chapter ARTIFICIAL INTELLIGENCE AND GENERATIVE AI learning curriculum outline for ${personaDescriptions[profile.personaType]}.
+
+**CRITICAL CONTEXT: This course is EXCLUSIVELY about Artificial Intelligence and Generative AI technology.**
+- ALL topics must be about AI/GenAI (Large Language Models, ChatGPT, Claude, Gemini, prompt engineering, AI agents, ML, RAG systems, etc.)
+- RAG = Retrieval-Augmented Generation (AI concept), NOT project management
+- Focus on AI tools, AI applications, AI implementation, AI strategy
+- NO non-AI topics (no general business, project management, or unrelated technology topics)
 
 **Learner Profile:**
 - AI Fluency Score: ${profile.aiScore}/100
 - Technical level: ${techLevel}
 - Goals: ${profile.goals.join(', ')}
 - Industry: ${profile.industry || 'General'}
-- Focus: Generative AI (LLMs, ChatGPT, Claude, prompt engineering, AI agents)
+- Focus: Generative AI (LLMs, ChatGPT, Claude, prompt engineering, AI agents, AI automation)
 
 **Requirements:**
-1. Generate exactly ${chapterCount} chapter titles that build progressively
-2. Each chapter needs a clear, specific learning objective
-3. Focus on practical GenAI applications and tools
-4. Make it relevant to their goals and industry
-5. Start with fundamentals, progress to advanced applications
+1. Generate exactly ${chapterCount} chapter titles that build progressively through AI/GenAI concepts
+2. Each chapter needs a clear, specific learning objective related to AI/GenAI
+3. Focus on practical GenAI applications and AI tools (ChatGPT, Claude, Perplexity, Midjourney, etc.)
+4. Make it relevant to their goals and industry, but ALWAYS in the context of AI/GenAI
+5. Start with AI fundamentals, progress to advanced AI applications
+6. Examples of good topics: Prompt Engineering, AI Agents, RAG (Retrieval-Augmented Generation), Fine-tuning, Vector Databases for AI, AI Ethics, etc.
 
 Return ONLY the JSON outline with title, subtitle, description, and ${chapterCount} chapters (number, title, objective).`
 }
