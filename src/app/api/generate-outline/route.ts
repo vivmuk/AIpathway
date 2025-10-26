@@ -34,8 +34,8 @@ export async function POST(request: NextRequest) {
               content: prompt
             }
           ],
-          temperature: 0.7,
-          max_tokens: 5000,
+          temperature: 0.5, // Lower temperature for faster, more focused responses
+          max_tokens: 3000, // Reduced for faster generation (outline is typically <2000 tokens)
           response_format: {
             type: 'json_schema',
             json_schema: {

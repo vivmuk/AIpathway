@@ -69,24 +69,61 @@ export default function CourseView({ userProfile }: CourseViewProps) {
     setChaptersGenerated(0)
 
     try {
-      // Step 1: Generate course outline
+      // Step 1: Generate course outline with retry logic
       setGenerationProgress('Creating your personalized course outline...')
       
-      const outlineResponse = await fetch('/api/generate-outline', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userProfile }),
-      })
+      let outline = null
+      let retryCount = 0
+      const maxRetries = 2
+      
+      while (!outline && retryCount <= maxRetries) {
+        try {
+          if (retryCount > 0) {
+            setGenerationProgress(`Retrying outline generation (attempt ${retryCount + 1}/${maxRetries + 1})...`)
+          }
+          
+          const outlineResponse = await fetch('/api/generate-outline', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userProfile }),
+          })
 
-      if (!outlineResponse.ok) {
-        const errorData = await outlineResponse.json().catch(() => ({}))
-        throw new Error(errorData.error || 'Failed to generate outline')
+          if (!outlineResponse.ok) {
+            const errorData = await outlineResponse.json().catch(() => ({}))
+            
+            // If it's a timeout (504) and we have retries left, try again
+            if (outlineResponse.status === 504 && retryCount < maxRetries) {
+              retryCount++
+              console.log(`⏰ Timeout detected, retrying... (${retryCount}/${maxRetries})`)
+              await new Promise(resolve => setTimeout(resolve, 2000)) // Wait 2 seconds before retry
+              continue
+            }
+            
+            throw new Error(errorData.error || 'Failed to generate outline')
+          }
+
+          const data = await outlineResponse.json()
+          outline = data.outline
+          console.log('✅ Outline generated:', outline.title)
+          break
+          
+        } catch (fetchError: any) {
+          // Network errors or timeout - retry if possible
+          if (retryCount < maxRetries && (fetchError.name === 'TypeError' || fetchError.message.includes('timeout'))) {
+            retryCount++
+            console.log(`⏰ Network error, retrying... (${retryCount}/${maxRetries})`)
+            await new Promise(resolve => setTimeout(resolve, 2000))
+            continue
+          }
+          throw fetchError
+        }
       }
-
-      const { outline } = await outlineResponse.json()
-      console.log('✅ Outline generated:', outline.title)
+      
+      if (!outline) {
+        throw new Error('Failed to generate outline after multiple attempts')
+      }
       
       // Create initial course object with empty chapters
       const courseId = `course-${Date.now()}`
