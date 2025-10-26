@@ -506,14 +506,14 @@ export default function CourseView({ userProfile }: CourseViewProps) {
               <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
                 <div 
                   className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-500"
-                  style={{ width: `${(chaptersGenerated / 10) * 100}%` }}
+                  style={{ width: `${(chaptersGenerated / (course?.chapters.length || 10)) * 100}%` }}
                 ></div>
               </div>
-              <p className="text-sm text-gray-500">Chapter {chaptersGenerated} of 10 complete</p>
+              <p className="text-sm text-gray-500">Chapter {chaptersGenerated} of {course?.chapters.length || 10} complete</p>
             </div>
           )}
           <p className="text-gray-600 mb-4">
-            Our AI is crafting a custom 10-chapter curriculum just for you
+            Our AI is crafting a custom {course?.chapters.length || 10}-chapter curriculum just for you
           </p>
           <div className="max-w-md mx-auto bg-gray-100 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
@@ -593,8 +593,10 @@ export default function CourseView({ userProfile }: CourseViewProps) {
       )
     }
 
+    const totalChapters = course.chapters.length
+    
     const handleNextChapter = () => {
-      if (selectedChapter < 10) {
+      if (selectedChapter < totalChapters) {
         setSelectedChapter(selectedChapter + 1)
       }
     }
@@ -611,9 +613,9 @@ export default function CourseView({ userProfile }: CourseViewProps) {
         onBack={handleBackToCourse}
         onComplete={() => handleChapterComplete(selectedChapter)}
         isCompleted={progress?.completedChapters.includes(selectedChapter) || false}
-        onNext={selectedChapter < 10 ? handleNextChapter : undefined}
+        onNext={selectedChapter < totalChapters ? handleNextChapter : undefined}
         onPrev={selectedChapter > 1 ? handlePrevChapter : undefined}
-        totalChapters={10}
+        totalChapters={totalChapters}
       />
     )
   }

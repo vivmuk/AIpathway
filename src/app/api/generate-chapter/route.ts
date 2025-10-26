@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { UserProfile } from '@/types'
+import { CHAPTER_TIMEOUT, CHAPTER_MODEL } from '@/config/course.config'
 
 interface ChapterOutline {
   chapterNumber: number
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
     const prompt = buildChapterPrompt(chapterOutline, userProfile, courseTitle)
     
     const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 120000) // 2 minutes per chapter
+    const timeout = setTimeout(() => controller.abort(), CHAPTER_TIMEOUT)
     
     try {
       const veniceResponse = await fetch(`${VENICE_API_URL}/chat/completions`, {
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
         },
         signal: controller.signal,
         body: JSON.stringify({
-          model: 'mistral-31-24b', // Venice Medium - good for detailed content
+          model: CHAPTER_MODEL,
           messages: [
             {
               role: 'system',

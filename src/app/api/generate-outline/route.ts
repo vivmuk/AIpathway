@@ -1,19 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { UserProfile } from '@/types'
+import { CHAPTER_COUNT, OUTLINE_TIMEOUT, OUTLINE_MODEL } from '@/config/course.config'
 
 export async function POST(request: NextRequest) {
   try {
     const { userProfile } = await request.json() as { userProfile: UserProfile }
 
-    console.log('📋 Generating course outline...')
+    console.log(`📋 Generating course outline (${CHAPTER_COUNT} chapters)...`)
 
     const VENICE_API_KEY = 'ntmhtbP2fr_pOQsmuLPuN_nm6lm2INWKiNcvrdEfEC'
     const VENICE_API_URL = 'https://api.venice.ai/api/v1'
     
-    const prompt = buildOutlinePrompt(userProfile)
+    const prompt = buildOutlinePrompt(userProfile, CHAPTER_COUNT)
     
     const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 60000) // 1 minute for outline
+    const timeout = setTimeout(() => controller.abort(), OUTLINE_TIMEOUT)
     
     try {
       const veniceResponse = await fetch(`${VENICE_API_URL}/chat/completions`, {
@@ -24,11 +25,11 @@ export async function POST(request: NextRequest) {
         },
         signal: controller.signal,
         body: JSON.stringify({
-          model: 'qwen3-235b',
+          model: OUTLINE_MODEL,
           messages: [
             {
               role: 'system',
-              content: 'You are an expert AI curriculum designer. Generate a course outline with 10 chapter titles and objectives. Respond with ONLY valid JSON.'
+              content: `You are an expert AI curriculum designer. Generate a course outline with ${CHAPTER_COUNT} chapter titles and objectives. Respond with ONLY valid JSON.`
             },
             {
               role: 'user',
@@ -50,8 +51,8 @@ export async function POST(request: NextRequest) {
                   overallDescription: { type: 'string' },
                   chapters: {
                     type: 'array',
-                    minItems: 10,
-                    maxItems: 10,
+                    minItems: CHAPTER_COUNT,
+                    maxItems: CHAPTER_COUNT,
                     items: {
                       type: 'object',
                       properties: {
@@ -109,7 +110,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function buildOutlinePrompt(profile: UserProfile): string {
+function buildOutlinePrompt(profile: UserProfile, chapterCount: number): string {
   const personaDescriptions = {
     beginner: 'a complete beginner who wants structured foundational knowledge of AI concepts',
     applied: 'someone with basic AI exposure who wants to apply AI to business workflows',
@@ -122,7 +123,7 @@ function buildOutlinePrompt(profile: UserProfile): string {
                     profile.aiScore < 75 ? 'intermediate to advanced' :
                     'advanced and technical'
 
-  return `Create a 10-chapter AI learning curriculum outline for ${personaDescriptions[profile.personaType]}.
+  return `Create a ${chapterCount}-chapter AI learning curriculum outline for ${personaDescriptions[profile.personaType]}.
 
 **Learner Profile:**
 - AI Fluency Score: ${profile.aiScore}/100
@@ -132,12 +133,12 @@ function buildOutlinePrompt(profile: UserProfile): string {
 - Focus: Generative AI (LLMs, ChatGPT, Claude, prompt engineering, AI agents)
 
 **Requirements:**
-1. Generate exactly 10 chapter titles that build progressively
+1. Generate exactly ${chapterCount} chapter titles that build progressively
 2. Each chapter needs a clear, specific learning objective
 3. Focus on practical GenAI applications and tools
 4. Make it relevant to their goals and industry
 5. Start with fundamentals, progress to advanced applications
 
-Return ONLY the JSON outline with title, subtitle, description, and 10 chapters (number, title, objective).`
+Return ONLY the JSON outline with title, subtitle, description, and ${chapterCount} chapters (number, title, objective).`
 }
 
