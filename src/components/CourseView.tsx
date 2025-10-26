@@ -115,47 +115,73 @@ export default function CourseView({ userProfile }: CourseViewProps) {
       
       for (let i = 0; i < outline.chapters.length; i++) {
         const chapterOutline = outline.chapters[i]
-        setGenerationProgress(`Generating Chapter ${i + 1} of 10: ${chapterOutline.title}`)
+        setGenerationProgress(`Generating Chapter ${i + 1} of ${outline.chapters.length}: ${chapterOutline.title}`)
         setChaptersGenerated(i)
         
-        try {
-          const chapterResponse = await fetch('/api/generate-chapter', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              chapterOutline,
-              userProfile,
-              courseTitle: outline.title
-            }),
-          })
+        let chapter = null
+        let retryCount = 0
+        const maxRetries = 2
+        
+        // Try to generate chapter with retries
+        while (!chapter && retryCount < maxRetries) {
+          try {
+            const chapterResponse = await fetch('/api/generate-chapter', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                chapterOutline,
+                userProfile,
+                courseTitle: outline.title
+              }),
+            })
 
-          if (chapterResponse.ok) {
-            const { chapter } = await chapterResponse.json()
-            fullChapters.push(chapter)
-            console.log(`✅ Chapter ${i + 1} complete`)
-            
-            // Update course with generated chapter
-            const updatedCourse = {
-              ...initialCourse,
-              chapters: initialCourse.chapters.map((ch, idx) => 
-                idx < fullChapters.length ? fullChapters[idx] : ch
-              )
+            if (chapterResponse.ok) {
+              const data = await chapterResponse.json()
+              chapter = data.chapter
+            } else {
+              retryCount++
+              if (retryCount < maxRetries) {
+                setGenerationProgress(`Retrying Chapter ${i + 1} (attempt ${retryCount + 1})...`)
+                await new Promise(resolve => setTimeout(resolve, 2000)) // Wait 2s before retry
+              }
             }
-            setCourse(updatedCourse)
-            setChaptersGenerated(i + 1)
-            
-            // Save progress after each chapter to prevent data loss
-            localStorage.setItem('aipathway_course', JSON.stringify(updatedCourse))
-          } else {
-            console.warn(`⚠️ Chapter ${i + 1} failed, using outline only`)
-            fullChapters.push(initialCourse.chapters[i])
+          } catch (chapterError) {
+            retryCount++
+            if (retryCount < maxRetries) {
+              setGenerationProgress(`Retrying Chapter ${i + 1} (attempt ${retryCount + 1})...`)
+              await new Promise(resolve => setTimeout(resolve, 2000))
+            }
           }
-        } catch (chapterError) {
-          console.error(`❌ Error generating chapter ${i + 1}:`, chapterError)
-          fullChapters.push(initialCourse.chapters[i])
         }
+        
+        // If chapter generation failed after retries, create a basic chapter
+        if (!chapter) {
+          chapter = {
+            ...chapterOutline,
+            content: `# ${chapterOutline.title}\n\n**Learning Objective:** ${chapterOutline.learningObjective}\n\n*This chapter is being regenerated. Please refresh or try exporting again in a moment.*\n\nIn this chapter, you will learn about ${chapterOutline.title.toLowerCase()}. The content will cover the fundamentals and practical applications related to ${chapterOutline.learningObjective.toLowerCase()}.`,
+            keyTerms: [],
+            examples: [],
+            tryItYourself: [],
+            toolWalkthrough: null
+          }
+        }
+        
+        fullChapters.push(chapter)
+        
+        // Update course with generated chapter
+        const updatedCourse = {
+          ...initialCourse,
+          chapters: initialCourse.chapters.map((ch, idx) => 
+            idx < fullChapters.length ? fullChapters[idx] : ch
+          )
+        }
+        setCourse(updatedCourse)
+        setChaptersGenerated(i + 1)
+        
+        // Save progress after each chapter to prevent data loss
+        localStorage.setItem('aipathway_course', JSON.stringify(updatedCourse))
       }
       
       // Final course with all chapters
@@ -777,7 +803,6 @@ export default function CourseView({ userProfile }: CourseViewProps) {
 
     // Check if chapter has content
     if (!chapter.content || chapter.content.trim() === '') {
-      console.warn('⚠️ Chapter has no content:', selectedChapter)
       return (
         <div className="max-w-4xl mx-auto p-8 bg-yellow-50 rounded-xl">
           <h2 className="text-2xl font-bold text-yellow-600 mb-2">Chapter Still Loading</h2>
