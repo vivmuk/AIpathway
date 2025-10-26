@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { UserProfile, Course, Progress } from '@/types'
 import ChapterCard from './ChapterCard'
+import { jsPDF } from 'jspdf'
 import ProgressDashboard from './ProgressDashboard'
 
 interface CourseViewProps {
@@ -218,8 +219,196 @@ export default function CourseView({ userProfile }: CourseViewProps) {
   }
 
   const handleExportPDF = () => {
-    // This will be implemented with jsPDF
-    alert('PDF export functionality coming soon!')
+    try {
+      if (!course) {
+        alert('No course to export')
+        return
+      }
+      
+      // Check if chapters have content
+      const chaptersWithContent = course.chapters.filter(ch => ch?.content && ch.content.trim() !== '')
+      if (chaptersWithContent.length === 0) {
+        alert('Please wait for chapters to finish generating before exporting.')
+        return
+      }
+      
+      if (chaptersWithContent.length < course.chapters.length) {
+        if (!confirm(`Only ${chaptersWithContent.length} of ${course.chapters.length} chapters have content. Export anyway?`)) {
+          return
+        }
+      }
+
+      const doc = new jsPDF()
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const pageHeight = doc.internal.pageSize.getHeight()
+      const margin = 20
+      const maxWidth = pageWidth - (margin * 2)
+      let yPosition = margin
+
+      // Helper to add new page if needed
+      const checkAddPage = (neededSpace: number) => {
+        if (yPosition + neededSpace > pageHeight - margin) {
+          doc.addPage()
+          yPosition = margin
+          return true
+        }
+        return false
+      }
+
+      // Helper to wrap and add text
+      const addWrappedText = (text: string, fontSize: number, fontStyle: string = 'normal', color: number[] = [0, 0, 0]) => {
+        doc.setFontSize(fontSize)
+        doc.setFont('helvetica', fontStyle)
+        doc.setTextColor(...color)
+        
+        const lines = doc.splitTextToSize(text, maxWidth)
+        const lineHeight = fontSize * 0.5
+        
+        lines.forEach((line: string) => {
+          checkAddPage(lineHeight)
+          doc.text(line, margin, yPosition)
+          yPosition += lineHeight
+        })
+        
+        yPosition += lineHeight * 0.3 // Small spacing after paragraph
+      }
+
+      // Title Page
+      doc.setFillColor(249, 115, 22) // Orange
+      doc.rect(0, 0, pageWidth, 60, 'F')
+      doc.setTextColor(255, 255, 255)
+      doc.setFontSize(28)
+      doc.setFont('helvetica', 'bold')
+      const titleLines = doc.splitTextToSize(course.title, maxWidth)
+      let titleY = 30
+      titleLines.forEach((line: string) => {
+        doc.text(line, pageWidth / 2, titleY, { align: 'center' })
+        titleY += 12
+      })
+      
+      yPosition = 80
+      addWrappedText(course.subtitle, 14, 'italic', [107, 114, 128])
+      yPosition += 10
+      addWrappedText(course.overallDescription, 11, 'normal', [55, 65, 81])
+      
+      yPosition += 20
+
+      // Chapters
+      chaptersWithContent.forEach((chapter, idx) => {
+        if (idx > 0) {
+          doc.addPage()
+          yPosition = margin
+        }
+
+        // Chapter Header
+        doc.setFillColor(59, 130, 246) // Blue
+        doc.rect(0, yPosition - 10, pageWidth, 20, 'F')
+        doc.setTextColor(255, 255, 255)
+        doc.setFontSize(18)
+        doc.setFont('helvetica', 'bold')
+        doc.text(`Chapter ${chapter.chapterNumber}: ${chapter.title}`, margin, yPosition)
+        yPosition += 15
+        
+        doc.setTextColor(0, 0, 0)
+        addWrappedText(`Objective: ${chapter.learningObjective}`, 10, 'italic', [75, 85, 99])
+        yPosition += 8
+
+        // Content
+        if (chapter.content) {
+          const contentParagraphs = chapter.content.split('\n\n')
+          contentParagraphs.forEach(para => {
+            if (para.trim()) {
+              // Remove markdown formatting for PDF
+              const cleanPara = para
+                .replace(/[#*`]/g, '')
+                .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+                .trim()
+              if (cleanPara) {
+                addWrappedText(cleanPara, 10, 'normal', [31, 41, 55])
+                yPosition += 3
+              }
+            }
+          })
+        }
+
+        yPosition += 10
+
+        // Key Terms
+        if (Array.isArray(chapter.keyTerms) && chapter.keyTerms.length > 0) {
+          checkAddPage(30)
+          addWrappedText('Key Terms', 14, 'bold', [30, 64, 175])
+          yPosition += 5
+          chapter.keyTerms.forEach(term => {
+            checkAddPage(20)
+            addWrappedText(`• ${term?.term || 'Term'}: ${term?.definition || ''}`, 9, 'normal', [55, 65, 81])
+            yPosition += 3
+          })
+          yPosition += 8
+        }
+
+        // Examples
+        if (Array.isArray(chapter.examples) && chapter.examples.length > 0) {
+          checkAddPage(30)
+          addWrappedText('Real-World Examples', 14, 'bold', [22, 163, 74])
+          yPosition += 5
+          chapter.examples.forEach((ex, i) => {
+            checkAddPage(20)
+            addWrappedText(`${i + 1}. ${ex || ''}`, 9, 'normal', [55, 65, 81])
+            yPosition += 3
+          })
+          yPosition += 8
+        }
+
+        // Try It Yourself
+        if (Array.isArray(chapter.tryItYourself) && chapter.tryItYourself.length > 0) {
+          checkAddPage(30)
+          addWrappedText('Try It Yourself', 14, 'bold', [147, 51, 234])
+          yPosition += 5
+          chapter.tryItYourself.forEach((ex, i) => {
+            checkAddPage(20)
+            addWrappedText(`${i + 1}. ${ex || ''}`, 9, 'normal', [55, 65, 81])
+            yPosition += 3
+          })
+          yPosition += 8
+        }
+
+        // Tool Walkthrough
+        if (chapter.toolWalkthrough && Array.isArray(chapter.toolWalkthrough.steps) && chapter.toolWalkthrough.steps.length > 0) {
+          checkAddPage(30)
+          addWrappedText(`Tool Walkthrough: ${chapter.toolWalkthrough.toolName || 'GenAI Tool'}`, 14, 'bold', [168, 85, 247])
+          yPosition += 5
+          if (chapter.toolWalkthrough.description) {
+            addWrappedText(chapter.toolWalkthrough.description, 9, 'italic', [75, 85, 99])
+            yPosition += 3
+          }
+          chapter.toolWalkthrough.steps.forEach((step, i) => {
+            checkAddPage(20)
+            addWrappedText(`${i + 1}. ${step || ''}`, 9, 'normal', [55, 65, 81])
+            yPosition += 3
+          })
+        }
+      })
+
+      // Footer on last page
+      doc.addPage()
+      yPosition = pageHeight / 2
+      doc.setFontSize(16)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(30, 64, 175)
+      doc.text(course.title, pageWidth / 2, yPosition, { align: 'center' })
+      yPosition += 15
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(107, 114, 128)
+      doc.text('Powered by AIPathway & Venice AI', pageWidth / 2, yPosition, { align: 'center' })
+
+      // Save PDF
+      const fileName = `${course.title.replace(/[^a-z0-9]/gi, '_')}.pdf`
+      doc.save(fileName)
+      
+    } catch (error: any) {
+      alert(`Failed to export PDF: ${error.message || 'Unknown error'}. Please try again.`)
+    }
   }
 
   const handleExportHTML = () => {
@@ -242,37 +431,37 @@ export default function CourseView({ userProfile }: CourseViewProps) {
         }
       }
 
-      // Helper function to convert markdown to HTML
+    // Helper function to convert markdown to HTML
       const markdownToHTML = (markdown: string | undefined | null): string => {
         if (!markdown || typeof markdown !== 'string') {
           return ''
         }
-        return markdown
-          // Headers
-          .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-          .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-          .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-          // Bold
-          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-          // Italic
-          .replace(/\*(.*?)\*/g, '<em>$1</em>')
-          // Code blocks
-          .replace(/```(.*?)```/gs, '<pre><code>$1</code></pre>')
-          // Inline code
-          .replace(/`(.*?)`/g, '<code>$1</code>')
-          // Links
-          .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>')
-          // Lists
-          .replace(/^\* (.*$)/gim, '<li>$1</li>')
-          .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
-          // Line breaks
-          .replace(/\n\n/g, '</p><p>')
-          // Blockquotes
-          .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
-      }
+      return markdown
+        // Headers
+        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+        // Bold
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        // Italic
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        // Code blocks
+        .replace(/```(.*?)```/gs, '<pre><code>$1</code></pre>')
+        // Inline code
+        .replace(/`(.*?)`/g, '<code>$1</code>')
+        // Links
+        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>')
+        // Lists
+        .replace(/^\* (.*$)/gim, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+        // Line breaks
+        .replace(/\n\n/g, '</p><p>')
+        // Blockquotes
+        .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
+    }
 
-      // Generate HTML content with proper markdown rendering
-      const htmlContent = `
+    // Generate HTML content with proper markdown rendering
+    const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -486,16 +675,16 @@ export default function CourseView({ userProfile }: CourseViewProps) {
 </html>
     `
 
-      // Create download
-      const blob = new Blob([htmlContent], { type: 'text/html' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `${course.title.replace(/[^a-z0-9]/gi, '_')}.html`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
+    // Create download
+    const blob = new Blob([htmlContent], { type: 'text/html' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${course.title.replace(/[^a-z0-9]/gi, '_')}.html`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
       
       console.log('✅ HTML export successful')
     } catch (error: any) {

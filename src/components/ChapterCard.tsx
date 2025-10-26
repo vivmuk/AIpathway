@@ -137,27 +137,27 @@ export default function ChapterCard({ chapter, onBack, onComplete, isCompleted, 
       </div>
 
       {/* Tool Walkthrough */}
-      {chapter.toolWalkthrough && (
+      {chapter.toolWalkthrough && Array.isArray(chapter.toolWalkthrough.steps) && chapter.toolWalkthrough.steps.length > 0 && (
         <div className="bg-white rounded-xl shadow-lg mb-6 overflow-hidden">
           <button
             onClick={() => setShowTools(!showTools)}
             className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 transition"
           >
             <h2 className="text-xl font-semibold text-gray-900">
-              🛠️ Tool Walkthrough: {chapter.toolWalkthrough.toolName}
+              🛠️ Tool Walkthrough: {chapter.toolWalkthrough.toolName || 'GenAI Tool'}
             </h2>
             <span className="text-2xl">{showTools ? '−' : '+'}</span>
           </button>
           {showTools && (
             <div className="p-6">
-              <p className="text-gray-700 mb-4">{chapter.toolWalkthrough.description}</p>
+              <p className="text-gray-700 mb-4">{chapter.toolWalkthrough.description || ''}</p>
               <div className="space-y-3">
                 {chapter.toolWalkthrough.steps.map((step, index) => (
                   <div key={index} className="flex items-start bg-purple-50 rounded-lg p-4">
                     <span className="bg-purple-600 text-white font-bold rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">
                       {index + 1}
                     </span>
-                    <p className="text-gray-800 pt-1">{step}</p>
+                    <p className="text-gray-800 pt-1">{step || ''}</p>
                   </div>
                 ))}
               </div>

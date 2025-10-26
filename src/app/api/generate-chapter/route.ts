@@ -104,19 +104,33 @@ export async function POST(request: NextRequest) {
 
       if (!veniceResponse.ok) {
         const errorText = await veniceResponse.text()
-        console.error(`❌ Chapter ${chapterOutline.chapterNumber} error:`, errorText)
         return NextResponse.json(
-          { error: `Chapter generation failed: ${veniceResponse.statusText}` },
+          { error: `Chapter generation failed: ${veniceResponse.statusText}`, details: errorText },
           { status: 500 }
         )
       }
 
       const data = await veniceResponse.json()
-      const chapter = JSON.parse(data.choices[0].message.content)
+      let rawContent = data.choices[0].message.content
       
-      console.log(`✅ Chapter ${chapterOutline.chapterNumber} generated`)
-      
-      return NextResponse.json({ chapter })
+      // Try to fix common JSON issues
+      try {
+        // Remove any markdown code blocks if present
+        rawContent = rawContent.replace(/```json\n?/g, '').replace(/```\n?$/g, '').trim()
+        
+        const chapter = JSON.parse(rawContent)
+        return NextResponse.json({ chapter })
+      } catch (parseError: any) {
+        // JSON parsing failed - try to salvage what we can
+        return NextResponse.json(
+          { 
+            error: 'Malformed JSON from AI', 
+            details: parseError.message,
+            partialContent: rawContent.substring(0, 500)
+          },
+          { status: 500 }
+        )
+      }
       
     } catch (fetchError: any) {
       clearTimeout(timeout)
