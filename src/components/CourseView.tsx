@@ -70,7 +70,7 @@ export default function CourseView({ userProfile }: CourseViewProps) {
       
       // Step 2: Generate each chapter with Mistral
       console.log('📖 Step 2: Generating chapters with Mistral...')
-      const fullChapters = []
+      const fullChapters: any[] = []
       
       for (let i = 0; i < outline.chapters.length; i++) {
         const chapterOutline = outline.chapters[i]
