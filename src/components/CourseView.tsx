@@ -519,7 +519,7 @@ export default function CourseView({ userProfile }: CourseViewProps) {
               <span className="text-gray-300">●</span>
             </div>
           </div>
-          <p className="text-sm text-gray-500 mt-6">This usually takes 30-45 seconds</p>
+          <p className="text-sm text-gray-500 mt-6">This usually takes about 10 minutes to generate all chapters</p>
         </div>
       </div>
     )
