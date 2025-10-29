@@ -14,5 +14,5 @@ export const CHAPTER_TIMEOUT = 300000 // 5 minutes
 
 // Model Configuration
 export const OUTLINE_MODEL = 'qwen3-235b'
-export const CHAPTER_MODEL = 'mistral-31-24b'
+export const CHAPTER_MODEL = 'zai-org-glm-4.6'
 
