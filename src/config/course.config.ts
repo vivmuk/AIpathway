@@ -13,8 +13,7 @@ export const OUTLINE_TIMEOUT = 60000 // 1 minute
 export const CHAPTER_TIMEOUT = 300000 // 5 minutes
 
 // Model Configuration
-// Using stable models - GLM 4.6 is beta and unstable
 export const OUTLINE_MODEL = 'qwen3-235b'
-export const CHAPTER_MODEL = 'qwen3-235b'  // Stable, reliable, same as outline
-export const LESSON_MODEL = 'qwen3-235b'   // Consistent across all endpoints
+export const CHAPTER_MODEL = 'zai-org-glm-4.6'
+export const LESSON_MODEL = 'zai-org-glm-4.6'
 
