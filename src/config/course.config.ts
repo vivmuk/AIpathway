@@ -14,6 +14,6 @@ export const CHAPTER_TIMEOUT = 300000 // 5 minutes
 
 // Model Configuration
 export const OUTLINE_MODEL = 'qwen3-235b'
-export const CHAPTER_MODEL = 'zai-org-glm-4.6'
-export const LESSON_MODEL = 'zai-org-glm-4.6'
+export const CHAPTER_MODEL = 'qwen3-235b'  // Stable and reliable for chapters
+export const LESSON_MODEL = 'zai-org-glm-4.6'  // GLM 4.6 for lessons
 
