@@ -146,8 +146,8 @@ export default function CourseView({ userProfile }: CourseViewProps) {
       
       setCourse(initialCourse)
       
-      // Step 2: Generate each chapter with Mistral
-      console.log('📖 Step 2: Generating chapters with Mistral...')
+      // Step 2: Generate each chapter with GLM 4.6
+      console.log('📖 Step 2: Generating chapters with GLM 4.6...')
       const fullChapters: any[] = []
       
       for (let i = 0; i < outline.chapters.length; i++) {

@@ -119,6 +119,73 @@ export async function POST(request: NextRequest) {
         rawContent = rawContent.replace(/```json\n?/g, '').replace(/```\n?$/g, '').trim()
         
         const chapter = JSON.parse(rawContent)
+        
+        // Add web search for latest information about the chapter topic
+        try {
+          const newsController = new AbortController()
+          const newsTimeout = setTimeout(() => newsController.abort(), 30000) // 30 seconds
+          
+          const newsPrompt = `Search the web for the latest developments, news, and updates about "${chapterOutline.title}" in the context of Artificial Intelligence and Generative AI. Find 2-3 recent relevant articles or updates.
+
+Return ONLY valid JSON:
+{
+  "latestUpdates": [
+    {
+      "headline": "Article or update title",
+      "summary": "Brief 1-2 sentence summary",
+      "source": "Source name",
+      "relevance": "How this relates to ${chapterOutline.title}"
+    }
+  ]
+}`
+          
+          const newsResponse = await fetch(`${VENICE_API_URL}/chat/completions`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${VENICE_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            signal: newsController.signal,
+            body: JSON.stringify({
+              model: 'llama-3.2-3b:enable_web_search=on',
+              messages: [
+                {
+                  role: 'system',
+                  content: 'You are a helpful AI news aggregator. Search the web for latest AI/GenAI developments and return results in JSON format.'
+                },
+                {
+                  role: 'user',
+                  content: newsPrompt
+                }
+              ],
+              temperature: 0.3,
+              max_tokens: 1500,
+            }),
+          })
+          
+          clearTimeout(newsTimeout)
+          
+          if (newsResponse.ok) {
+            try {
+              const newsData = await newsResponse.json()
+              let newsContent = newsData.choices[0].message.content
+              newsContent = newsContent.replace(/```json\n?/g, '').replace(/```\n?$/g, '').trim()
+              const newsParsed = JSON.parse(newsContent)
+              
+              // Add latest updates to chapter
+              chapter.latestUpdates = newsParsed.latestUpdates || []
+            } catch (newsParseError) {
+              // Continue without news if parsing fails
+              chapter.latestUpdates = []
+            }
+          } else {
+            chapter.latestUpdates = []
+          }
+        } catch (newsError) {
+          // Continue without news if fetch fails
+          chapter.latestUpdates = []
+        }
+        
         return NextResponse.json({ chapter })
       } catch (parseError: any) {
         // JSON parsing failed - try to salvage what we can

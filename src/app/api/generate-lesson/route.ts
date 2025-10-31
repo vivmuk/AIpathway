@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { LESSON_MODEL } from '@/config/course.config'
 
 export async function POST(request: NextRequest) {
   try {
@@ -72,7 +73,7 @@ Return ONLY valid JSON with these exact fields:
         },
         signal: controller.signal,
         body: JSON.stringify({
-          model: 'mistral-31-24b',
+          model: LESSON_MODEL,
           messages: [
             {
               role: 'system',
